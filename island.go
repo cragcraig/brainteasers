@@ -133,8 +133,8 @@ func (m *TileMap) CalcIds() {
 	id := 0
 	bnd := []Vect{Vect{0, 0}}
 	for len(bnd) != 0 {
-		v := bnd[len(bnd)-1]
-		bnd = bnd[:len(bnd)-1]
+		v := bnd[0]
+		bnd = bnd[1:]
 		if m.GetId(v) != 0 {
 			// Already visited; also handled below, but
 			// this shortcuts before creating ids on revisits.
@@ -145,8 +145,8 @@ func (m *TileMap) CalcIds() {
 		// Visit all connected homogeneous nodes.
 		stack := []Vect{v}
 		for len(stack) != 0 {
-			pos := stack[len(stack)-1]
-			stack = stack[:len(stack)-1]
+			pos := stack[0]
+			stack = stack[1:]
 			if m.GetId(pos) != 0 {
 				// Already visited.
 			} else if m.Get(pos) != t {
