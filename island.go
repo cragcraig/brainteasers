@@ -30,15 +30,15 @@ type Vect struct {
 
 // Get the coordinates of the surrounding 8 tiles.
 func nearby(v Vect) []Vect {
-	r := make([]Vect, 0, 8)
-	for x := v.x - 1; x <= v.x+1; x++ {
-		for y := v.y - 1; y <= v.y+1; y++ {
-			if v.x != x || v.y != y {
-				r = append(r, Vect{x, y})
-			}
-		}
-	}
-	return r
+	return []Vect{
+		Vect{v.x - 1, v.y + 1},
+		Vect{v.x - 1, v.y},
+		Vect{v.x - 1, v.y - 1},
+		Vect{v.x, v.y + 1},
+		Vect{v.x, v.y - 1},
+		Vect{v.x + 1, v.y + 1},
+		Vect{v.x + 1, v.y},
+		Vect{v.x + 1, v.y - 1}}
 }
 
 func randVect(w, h int) Vect {
@@ -131,29 +131,30 @@ func (m *TileMap) GetNeighbors(v Vect) []Vect {
 
 func (m *TileMap) CalcIds() {
 	id := 0
+	// Assign a unique id to all homogenous nodes connected to each boundary node.
 	bnd := []Vect{Vect{0, 0}}
 	for len(bnd) != 0 {
 		v := bnd[0]
 		bnd = bnd[1:]
 		if m.GetId(v) != 0 {
 			// Already visited; also handled below, but
-			// this shortcuts before creating ids on revisits.
+			// this shortcuts before creating new ids on revisits.
 			continue
 		}
 		id += 1
 		t := m.Get(v)
-		// Visit all connected homogeneous nodes.
+		// Visit all connected homogeneous nodes, noting location of heterogeneous nodes.
 		stack := []Vect{v}
 		for len(stack) != 0 {
 			pos := stack[0]
 			stack = stack[1:]
 			if m.GetId(pos) != 0 {
-				// Already visited.
+				// Already visited, skip.
 			} else if m.Get(pos) != t {
-				// Land/water boundary.
+				// Heterogenous (aka boundary) node, add to set of boundary nodes to visit.
 				bnd = append(bnd, pos)
 			} else {
-				// More of the same.
+				// Homogeneous node, set id and add neighbors.
 				m.SetId(pos, id)
 				for _, neighbor := range m.GetNeighbors(pos) {
 					stack = append(stack, neighbor)
